@@ -187,6 +187,7 @@ public class PluginMessageListener implements Listener {
                     try {
                         String output = gson.toJson(status);
                         out.writeUTF("GetServerStatus");
+                        out.writeUTF(server.getName());
                         out.writeUTF(output);
                     } catch (IOException e) {
                         e.printStackTrace();
