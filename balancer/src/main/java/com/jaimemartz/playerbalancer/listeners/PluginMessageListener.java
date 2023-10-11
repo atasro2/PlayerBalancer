@@ -2,9 +2,7 @@ package com.jaimemartz.playerbalancer.listeners;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSerializer;
+import com.google.gson.*;
 import com.jaimemartz.playerbalancer.PlayerBalancer;
 import com.jaimemartz.playerbalancer.connection.ConnectionIntent;
 import com.jaimemartz.playerbalancer.helper.PlayerLocker;
@@ -20,8 +18,21 @@ import net.md_5.bungee.event.EventHandler;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.Set;
 
 import static com.jaimemartz.playerbalancer.PlayerBalancer.PB_CHANNEL;
+
+class ServerInfoSetSerializer implements JsonSerializer<Set<ServerInfo>> {
+    @Override
+    public JsonElement serialize(Set<ServerInfo> set, Type typeOfSrc, JsonSerializationContext context) {
+        JsonArray jsonArray = new JsonArray();
+        for (ServerInfo item : set) {
+            jsonArray.add(context.serialize(item.getName()));
+        }
+        return jsonArray;
+    }
+}
 
 public class PluginMessageListener implements Listener {
     private final PlayerBalancer plugin;
@@ -35,7 +46,8 @@ public class PluginMessageListener implements Listener {
         builder.registerTypeAdapter(ServerInfo.class, (JsonSerializer<ServerInfo>) (server, type, context) ->
                 context.serialize(server.getName())
         );
-
+        builder.registerTypeAdapter(Set.class, new ServerInfoSetSerializer());
+        
         builder.serializeNulls();
         gson = builder.create();
     }
